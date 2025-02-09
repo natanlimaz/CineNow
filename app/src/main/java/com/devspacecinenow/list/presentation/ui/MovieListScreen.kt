@@ -14,12 +14,17 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -51,11 +56,11 @@ fun MovieListScreen(
 
 @Composable
 private fun MovieListContent(
-    topRated: List<MovieDto>,
-    nowPlaying: List<MovieDto>,
-    popular: List<MovieDto>,
-    upcoming: List<MovieDto>,
-    onClick: (MovieDto) -> Unit
+    topRated: MovieListUiState,
+    nowPlaying: MovieListUiState,
+    popular: MovieListUiState,
+    upcoming: MovieListUiState,
+    onClick: (MovieUiData) -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -70,25 +75,25 @@ private fun MovieListContent(
         )
 
         MovieSession(
-            movieList = topRated,
+            movieListUiState = topRated,
             label = "Top rated",
             onClick = onClick
         )
 
         MovieSession(
-            movieList = nowPlaying,
+            movieListUiState = nowPlaying,
             label = "Now playing",
             onClick = onClick
         )
 
         MovieSession(
-            movieList = popular,
+            movieListUiState = popular,
             label = "Popular",
             onClick = onClick
         )
 
         MovieSession(
-            movieList = upcoming,
+            movieListUiState = upcoming,
             label = "Upcoming",
             onClick = onClick
         )
@@ -99,8 +104,8 @@ private fun MovieListContent(
 @Composable
 private fun MovieSession(
     label: String,
-    movieList: List<MovieDto>,
-    onClick: (MovieDto) -> Unit
+    movieListUiState: MovieListUiState,
+    onClick: (MovieUiData) -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -113,20 +118,40 @@ private fun MovieSession(
             fontWeight = FontWeight.SemiBold
         )
         Spacer(modifier = Modifier.size(8.dp))
-        MovieList(
-            movieList = movieList,
-            onClick = onClick
-        )
+
+        if(movieListUiState.isLoading) {
+            CircularProgressIndicator(
+                modifier = Modifier
+                    .width(34.dp)
+                    .height(34.dp)
+                    .align(Alignment.CenterHorizontally)
+                ,
+                color = MaterialTheme.colorScheme.secondary,
+                trackColor = MaterialTheme.colorScheme.surfaceVariant,
+            )
+        }
+        else if(movieListUiState.isError) {
+            Text(
+                color = Color.Red,
+                text = movieListUiState.errorMessage ?: "",
+            )
+        }
+        else {
+            MovieList(
+                movieListUiState = movieListUiState.list,
+                onClick = onClick
+            )
+        }
     }
 }
 
 @Composable
 private fun MovieList(
-    movieList: List<MovieDto>,
-    onClick: (MovieDto) -> Unit
+    movieListUiState: List<MovieUiData>,
+    onClick: (MovieUiData) -> Unit
 ) {
     LazyRow {
-        items(movieList) {
+        items(movieListUiState) {
             MovieItem(
                 movieDto = it,
                 onClick = onClick
@@ -137,8 +162,8 @@ private fun MovieList(
 
 @Composable
 private fun MovieItem(
-    movieDto: MovieDto,
-    onClick: (MovieDto) -> Unit
+    movieDto: MovieUiData,
+    onClick: (MovieUiData) -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -153,7 +178,7 @@ private fun MovieItem(
                 .width(120.dp)
                 .height(150.dp),
             contentScale = ContentScale.Crop,
-            model = movieDto.posterFullPath,
+            model = movieDto.image,
             contentDescription = "${movieDto.title} Poster image"
         )
         Spacer(modifier = Modifier.size(4.dp))
