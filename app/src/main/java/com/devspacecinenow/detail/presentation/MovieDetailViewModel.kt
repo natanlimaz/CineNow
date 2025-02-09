@@ -4,8 +4,8 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.devspacecinenow.common.data.RetrofitClient
-import com.devspacecinenow.common.model.MovieDto
+import com.devspacecinenow.common.data.remote.RetrofitClient
+import com.devspacecinenow.common.data.remote.model.MovieDto
 import com.devspacecinenow.detail.data.DetailService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay

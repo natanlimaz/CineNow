@@ -3,12 +3,9 @@ package com.devspacecinenow.list.presentation
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
-import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.devspacecinenow.CineNowApplication
-import com.devspacecinenow.common.data.RetrofitClient
-import com.devspacecinenow.list.data.remote.ListService
 import com.devspacecinenow.list.data.MovieListRepository
 import com.devspacecinenow.list.presentation.ui.MovieListUiState
 import com.devspacecinenow.list.presentation.ui.MovieUiData
@@ -51,14 +48,14 @@ class MovieListViewModel(
         viewModelScope.launch(Dispatchers.IO) {
             val response = repository.getNowPlaying();
             if (response.isSuccess) {
-                val movies = response.getOrNull()?.results;
+                val movies = response.getOrNull();
                 if (movies != null) {
                     val movieUiDataList = movies.map { movieDto ->
                         MovieUiData(
                             id = movieDto.id,
                             title = movieDto.title,
                             overview = movieDto.overview,
-                            image = movieDto.posterFullPath
+                            image = movieDto.image
                         )
                     }
 
@@ -82,19 +79,20 @@ class MovieListViewModel(
         }
     }
 
+
     private fun fetchTopRatedMovies() {
         _uiTopRated.value = MovieListUiState(isLoading = true);
         viewModelScope.launch(Dispatchers.IO) {
             val response = repository.getTopRated();
             if (response.isSuccess) {
-                val movies = response.getOrNull()?.results;
+                val movies = response.getOrNull();
                 if (movies != null) {
                     val movieUiDataList = movies.map { movieDto ->
                         MovieUiData(
                             id = movieDto.id,
                             title = movieDto.title,
                             overview = movieDto.overview,
-                            image = movieDto.posterFullPath
+                            image = movieDto.image
                         )
                     }
 
@@ -121,14 +119,14 @@ class MovieListViewModel(
         viewModelScope.launch(Dispatchers.IO) {
             val response = repository.getPopular();
             if (response.isSuccess) {
-                val movies = response.getOrNull()?.results;
+                val movies = response.getOrNull();
                 if (movies != null) {
                     val movieUiDataList = movies.map { movieDto ->
                         MovieUiData(
                             id = movieDto.id,
                             title = movieDto.title,
                             overview = movieDto.overview,
-                            image = movieDto.posterFullPath
+                            image = movieDto.image
                         )
                     }
 
@@ -156,14 +154,14 @@ class MovieListViewModel(
         viewModelScope.launch(Dispatchers.IO) {
             val response = repository.getUpcoming();
             if (response.isSuccess) {
-                val movies = response.getOrNull()?.results;
+                val movies = response.getOrNull();
                 if (movies != null) {
                     val movieUiDataList = movies.map { movieDto ->
                         MovieUiData(
                             id = movieDto.id,
                             title = movieDto.title,
                             overview = movieDto.overview,
-                            image = movieDto.posterFullPath
+                            image = movieDto.image
                         )
                     }
 
@@ -189,10 +187,7 @@ class MovieListViewModel(
         val Factory: ViewModelProvider.Factory = object : ViewModelProvider.Factory {
             @Suppress("UNCHECKED_CAST")
             override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
-                val listService = RetrofitClient.retrofitInstance.create(ListService::class.java);
-
                 val application = checkNotNull(extras[APPLICATION_KEY]);
-                val savedStateHandle = extras.createSavedStateHandle();
 
                 return MovieListViewModel(
                     repository = (application as CineNowApplication).repository,
